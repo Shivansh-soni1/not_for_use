@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You've Got Mail!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --sky: #87CEEB;
+  --sky2: #b8e4f7;
+  --ground: #5DBB63;
+  --ground2: #4aa550;
+  --road: #888;
+  --sun: #FFD93D;
+  --cloud: #fff;
+  --envelope: #FF6B6B;
+  --envelope2: #ff8e8e;
+  --btn: #FFD93D;
+  --btn2: #ffbc00;
+  --outline: #222;
+}
+
+body {
+  background: var(--sky);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: 'Nunito', sans-serif;
+  overflow: hidden;
+  cursor: default;
+}
+
+/* ---- SKY GRADIENT ---- */
+.sky {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #5bc8f5 0%, #a8dff5 55%, #c8eefc 100%);
+  z-index: 0;
+}
+
+/* ---- SUN ---- */
+.sun {
+  position: fixed;
+  top: 36px; right: 80px;
+  width: 72px; height: 72px;
+  background: var(--sun);
+  border-radius: 50%;
+  border: 4px solid var(--outline);
+  box-shadow: 0 0 0 6px rgba(255,217,61,0.3);
+  z-index: 1;
+  animation: sunPulse 3s ease-in-out infinite;
+}
+.sun::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  background: repeating-conic-gradient(
+    rgba(255,217,61,0.35) 0deg 20deg,
+    transparent 20deg 40deg
+  );
+  border-radius: 50%;
+  animation: sunSpin 8s linear infinite;
+}
+@keyframes sunPulse { 0%,100%{box-shadow:0 0 0 6px rgba(255,217,61,0.3)} 50%{box-shadow:0 0 0 14px rgba(255,217,61,0.15)} }
+@keyframes sunSpin { to { transform: rotate(360deg); } }
+
+/* ---- CLOUDS ---- */
+.cloud {
+  position: fixed;
+  background: #fff;
+  border-radius: 50px;
+  border: 3.5px solid var(--outline);
+  z-index: 2;
+}
+.cloud::before, .cloud::after {
+  content: '';
+  background: #fff;
+  border-radius: 50%;
+  border: 3.5px solid var(--outline);
+  position: absolute;
+}
+.c1 { width: 100px; height: 40px; top: 60px; left: 60px; animation: cloudDrift 18s linear infinite; }
+.c1::before { width: 50px; height: 50px; top: -22px; left: 12px; }
+.c1::after { width: 36px; height: 36px; top: -14px; left: 46px; }
+
+.c2 { width: 130px; height: 46px; top: 110px; left: -50px; animation: cloudDrift 24s 5s linear infinite; }
+.c2::before { width: 60px; height: 60px; top: -26px; left: 18px; }
+.c2::after { width: 44px; height: 44px; top: -18px; left: 62px; }
+
+.c3 { width: 80px; height: 30px; top: 80px; right: 200px; animation: cloudDrift2 20s 2s linear infinite; }
+.c3::before { width: 40px; height: 40px; top: -18px; left: 8px; }
+.c3::after { width: 30px; height: 30px; top: -12px; left: 36px; }
+
+@keyframes cloudDrift { from{transform:translateX(-200px)} to{transform:translateX(120vw)} }
+@keyframes cloudDrift2 { from{transform:translateX(0)} to{transform:translateX(-120vw)} }
+
+/* ---- GROUND ---- */
+.ground {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 160px;
+  background: var(--ground);
+  border-top: 5px solid var(--outline);
+  z-index: 3;
+}
+.ground::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 30px;
+  background: var(--ground2);
+  border-bottom: 3px solid rgba(0,0,0,0.08);
+}
+
+/* Road */
+.road {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: #9e9e9e;
+  border-top: 5px solid #666;
+  z-index: 4;
+}
+.road-stripe {
+  position: absolute;
+  top: 50%; left: -100px;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #FFD93D 0px 60px, transparent 60px 120px);
+  width: 200vw;
+  transform: translateY(-50%);
+  border-radius: 4px;
+  animation: roadMove 0.5s linear infinite;
+}
+@keyframes roadMove { from{transform:translateX(0) translateY(-50%)} to{transform:translateX(-120px) translateY(-50%)} }
+
+/* ---- BIKE + RIDER ---- */
+.bike-scene {
+  position: fixed;
+  bottom: 55px;
+  left: -220px;
+  z-index: 10;
+  animation: bikeRide 3.2s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes bikeRide {
+  0%   { left: -220px; }
+  55%  { left: calc(50vw - 80px); }
+  70%  { left: calc(50vw - 80px); }
+  100% { left: calc(50vw - 80px); }
+}
+
+/* Bike SVG wrapper */
+.bike-svg {
+  width: 160px;
+  position: relative;
+}
+
+/* Wheels spin */
+.wheel { animation: spin 0.4s linear infinite; transform-origin: center; transform-box: fill-box; }
+.bike-scene.stopped .wheel { animation: none; }
+
+/* ---- ENVELOPE DROP ---- */
+.envelope-wrap {
+  position: fixed;
+  left: calc(50vw - 20px);
+  top: -100px;
+  z-index: 20;
+  opacity: 0;
+}
+.envelope-wrap.drop {
+  animation: envDrop 0.7s 3.3s cubic-bezier(0.34,1.2,0.64,1) forwards;
+}
+@keyframes envDrop {
+  0%  { top: -100px; opacity: 0; transform: rotate(-15deg); }
+  60% { top: calc(100vh - 195px); opacity: 1; transform: rotate(8deg); }
+  80% { top: calc(100vh - 185px); transform: rotate(-3deg); }
+  100%{ top: calc(100vh - 190px); opacity: 1; transform: rotate(0deg); }
+}
+
+/* Envelope shape */
+.envelope {
+  width: 90px;
+  height: 66px;
+  background: #FF6B6B;
+  border-radius: 4px;
+  border: 4px solid var(--outline);
+  position: relative;
+  box-shadow: 4px 4px 0 var(--outline);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.envelope:hover { transform: scale(1.08) rotate(-2deg); }
+.envelope:active { transform: scale(0.95); }
+
+/* Envelope flap */
+.envelope::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  border-left: 45px solid transparent;
+  border-right: 45px solid transparent;
+  border-top: 32px solid #ff8e8e;
+  border-bottom: none;
+  z-index: 2;
+}
+/* V fold line */
+.envelope::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  border-left: 45px solid transparent;
+  border-right: 45px solid transparent;
+  border-top: 32px solid var(--outline);
+  z-index: 1;
+}
+
+.env-lines {
+  position: absolute;
+  bottom: 10px; left: 14px; right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 3;
+}
+.env-line {
+  height: 4px;
+  background: #fff;
+  border-radius: 2px;
+  opacity: 0.8;
+}
+.env-line:last-child { width: 60%; }
+
+/* Stars bounce around envelope on drop */
+.star {
+  position: absolute;
+  font-size: 18px;
+  opacity: 0;
+  pointer-events: none;
+}
+.envelope-wrap.drop .star { animation: starPop 0.5s 3.95s ease both; }
+.star:nth-child(2) { animation-delay: 3.97s !important; }
+.star:nth-child(3) { animation-delay: 3.99s !important; }
+.s1 { top: -20px; left: -20px; }
+.s2 { top: -24px; right: -10px; }
+.s3 { bottom: -16px; right: -20px; }
+@keyframes starPop {
+  0%  { opacity:0; transform: scale(0) rotate(0deg); }
+  60% { opacity:1; transform: scale(1.3) rotate(20deg); }
+  100%{ opacity:0; transform: scale(1) translateY(-16px); }
+}
+
+/* ---- SPEECH BUBBLE ---- */
+.bubble {
+  position: fixed;
+  bottom: 230px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: #fff;
+  border: 4px solid var(--outline);
+  border-radius: 20px;
+  padding: 12px 22px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: var(--outline);
+  white-space: nowrap;
+  box-shadow: 4px 4px 0 var(--outline);
+  z-index: 30;
+  opacity: 0;
+}
+.bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -22px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 20px solid var(--outline);
+}
+.bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -14px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 18px solid #fff;
+  z-index: 1;
+}
+.bubble.show {
+  animation: bubblePop 0.5s 4.1s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes bubblePop {
+  to { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* ---- OPEN BUTTON ---- */
+.open-btn {
+  position: fixed;
+  bottom: 115px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: var(--btn);
+  border: 4px solid var(--outline);
+  border-radius: 50px;
+  padding: 16px 40px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: var(--outline);
+  cursor: pointer;
+  box-shadow: 5px 5px 0 var(--outline);
+  z-index: 30;
+  opacity: 0;
+  letter-spacing: 1px;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+  white-space: nowrap;
+}
+.open-btn:not(.show):hover { background: var(--btn2); }
+.open-btn:active { box-shadow: 2px 2px 0 var(--outline); transform: translateX(-50%) scale(0.97) !important; }
+
+.open-btn.show {
+  animation: btnBounce 0.6s 4.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes btnBounce {
+  to { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+.open-btn.show:hover {
+  transform: translateX(-50%) scale(1.07) !important;
+  background: var(--btn2);
+  box-shadow: 6px 6px 0 var(--outline);
+}
+
+/* ---- CLICK BURST ---- */
+.burst {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+.burst.active {
+  animation: burstFade 0.6s ease forwards;
+}
+.burst-circle {
+  position: absolute;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--btn);
+  border: 4px solid var(--outline);
+  animation: none;
+}
+.burst.active .burst-circle { animation: burstExpand 0.5s ease forwards; }
+.burst.active .burst-circle:nth-child(1) { background:#FF6B6B; animation-delay:0s; width:60px;height:60px; }
+.burst.active .burst-circle:nth-child(2) { background:#FFD93D; animation-delay:0.05s; width:100px;height:100px; }
+.burst.active .burst-circle:nth-child(3) { background:#a8f07a; animation-delay:0.1s; width:160px;height:160px; }
+.burst.active .burst-circle:nth-child(4) { background:#5bc8f5; animation-delay:0.15s; width:260px;height:260px; }
+.burst.active .burst-circle:nth-child(5) { background:#fff; animation-delay:0.2s; width:500px;height:500px; }
+
+@keyframes burstFade { to { opacity: 0; } }
+@keyframes burstExpand {
+  0%  { transform: scale(0); opacity: 1; }
+  100%{ transform: scale(4); opacity: 0; }
+}
+
+/* ---- DOTS LOADING ---- */
+.dots {
+  position: fixed;
+  bottom: 170px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 8px;
+  z-index: 25;
+  opacity: 0;
+}
+.dot {
+  width: 10px; height: 10px;
+  background: var(--outline);
+  border-radius: 50%;
+  animation: dotBounce 0.6s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.1s; }
+.dot:nth-child(3) { animation-delay: 0.2s; }
+@keyframes dotBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.dots.show { opacity: 1; }
+
+/* Birds */
+.bird {
+  position: fixed;
+  font-size: 22px;
+  z-index: 5;
+  animation: birdFly 12s linear infinite;
+  top: 50px;
+}
+.bird:nth-child(2) { top: 70px; animation-duration: 16s; animation-delay: -4s; font-size: 16px; }
+.bird:nth-child(3) { top: 38px; animation-duration: 9s; animation-delay: -2s; font-size: 14px; }
+@keyframes birdFly { from{left:-60px} to{left:110vw} }
+
+/* Speed lines behind bike */
+.speed-lines {
+  position: fixed;
+  bottom: 90px;
+  left: 0;
+  z-index: 8;
+  opacity: 0;
+}
+.speed-lines.show { opacity: 1; animation: speedFade 3s ease forwards; }
+@keyframes speedFade { 0%{opacity:1} 80%{opacity:0.3} 100%{opacity:0} }
+.spline {
+  height: 3px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.6));
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+
+<!-- Sun -->
+<div class="sun"></div>
+
+<!-- Clouds -->
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
+
+<!-- Birds -->
+<div class="bird">🐦</div>
+<div class="bird">🐦</div>
+<div class="bird">🐦</div>
+
+<!-- Ground -->
+<div class="ground"></div>
+
+<!-- Road -->
+<div class="road">
+  <div class="road-stripe"></div>
+</div>
+
+<!-- Speed lines -->
+<div class="speed-lines show" id="speedLines">
+  <div class="spline" style="width:180px"></div>
+  <div class="spline" style="width:120px; margin-left:20px"></div>
+  <div class="spline" style="width:200px; margin-left:-10px"></div>
+  <div class="spline" style="width:90px; margin-left:30px"></div>
+</div>
+
+<!-- BIKE SCENE (SVG) -->
+<div class="bike-scene" id="bikeScene">
+  <svg class="bike-svg" viewBox="0 0 160 110" xmlns="http://www.w3.org/2000/svg">
+    <!-- Rear Wheel -->
+    <circle class="wheel" cx="38" cy="82" r="24" fill="#ddd" stroke="#222" stroke-width="4"/>
+    <circle cx="38" cy="82" r="10" fill="#aaa" stroke="#222" stroke-width="3"/>
+    <line x1="38" y1="58" x2="38" y2="106" stroke="#222" stroke-width="2.5"/>
+    <line x1="14" y1="82" x2="62" y2="82" stroke="#222" stroke-width="2.5"/>
+    <line x1="21" y1="65" x2="55" y2="99" stroke="#222" stroke-width="2"/>
+    <line x1="55" y1="65" x2="21" y2="99" stroke="#222" stroke-width="2"/>
+
+    <!-- Front Wheel -->
+    <circle class="wheel" cx="122" cy="82" r="24" fill="#ddd" stroke="#222" stroke-width="4"/>
+    <circle cx="122" cy="82" r="10" fill="#aaa" stroke="#222" stroke-width="3"/>
+    <line x1="122" y1="58" x2="122" y2="106" stroke="#222" stroke-width="2.5"/>
+    <line x1="98" y1="82" x2="146" y2="82" stroke="#222" stroke-width="2.5"/>
+    <line x1="105" y1="65" x2="139" y2="99" stroke="#222" stroke-width="2"/>
+    <line x1="139" y1="65" x2="105" y2="99" stroke="#222" stroke-width="2"/>
+
+    <!-- Frame -->
+    <polygon points="38,78 70,38 100,78 80,78 62,78" fill="#FF6B6B" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="70" y1="38" x2="122" y2="78" stroke="#FF6B6B" stroke-width="7"/>
+    <line x1="70" y1="38" x2="122" y2="78" stroke="#222" stroke-width="3.5"/>
+
+    <!-- Seat post & seat -->
+    <line x1="70" y1="38" x2="64" y2="20" stroke="#222" stroke-width="4"/>
+    <rect x="52" y="14" width="30" height="8" rx="4" fill="#333" stroke="#222" stroke-width="2.5"/>
+
+    <!-- Handlebar post & bar -->
+    <line x1="122" y1="60" x2="118" y2="38" stroke="#222" stroke-width="4"/>
+    <line x1="110" y1="32" x2="128" y2="32" stroke="#222" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Pedal crank -->
+    <circle cx="80" cy="72" r="6" fill="#888" stroke="#222" stroke-width="2.5"/>
+    <line x1="68" y1="78" x2="92" y2="66" stroke="#222" stroke-width="3"/>
+    <rect x="60" y="74" width="12" height="6" rx="2" fill="#555" stroke="#222" stroke-width="2"/>
+    <rect x="84" y="60" width="12" height="6" rx="2" fill="#555" stroke="#222" stroke-width="2"/>
+
+    <!-- Rider body -->
+    <!-- Torso -->
+    <path d="M 68 18 Q 80 10 95 22 L 85 52 L 65 52 Z" fill="#5bc8f5" stroke="#222" stroke-width="3"/>
+    <!-- Legs -->
+    <line x1="72" y1="52" x2="68" y2="78" stroke="#222" stroke-width="5" stroke-linecap="round"/>
+    <line x1="78" y1="52" x2="92" y2="64" stroke="#222" stroke-width="5" stroke-linecap="round"/>
+    <!-- Arms -->
+    <line x1="85" y1="30" x2="112" y2="32" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+    <!-- Head -->
+    <circle cx="80" cy="10" r="13" fill="#FFDAB9" stroke="#222" stroke-width="3"/>
+    <!-- Helmet -->
+    <path d="M 67 10 Q 68 -3 80 -3 Q 92 -3 93 10" fill="#FF6B6B" stroke="#222" stroke-width="2.5"/>
+    <!-- Eye -->
+    <circle cx="84" cy="11" r="2.5" fill="#222"/>
+    <circle cx="85" cy="10" r="1" fill="#fff"/>
+    <!-- Smile -->
+    <path d="M 76 15 Q 80 19 84 15" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Hair tuft -->
+    <path d="M 70 4 Q 72 -1 75 2" stroke="#222" stroke-width="2" fill="none"/>
+
+    <!-- Mailbag on back -->
+    <rect x="52" y="24" width="18" height="22" rx="4" fill="#FFD93D" stroke="#222" stroke-width="2.5"/>
+    <line x1="52" y1="34" x2="70" y2="34" stroke="#222" stroke-width="2"/>
+    <rect x="57" y="30" width="8" height="5" rx="1" fill="#fff" stroke="#222" stroke-width="1.5"/>
+  </svg>
+</div>
+
+<!-- Envelope drop -->
+<div class="envelope-wrap drop" id="envWrap">
+  <span class="star s1">⭐</span>
+  <span class="star s2">✨</span>
+  <span class="star s3">⭐</span>
+  <div class="envelope" onclick="openMsg()">
+    <div class="env-lines">
+      <div class="env-line"></div>
+      <div class="env-line"></div>
+      <div class="env-line"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Speech bubble -->
+<div class="bubble show" id="bubble">📬 You've got mail!</div>
+
+<!-- Loading dots (brief) -->
+<div class="dots" id="dots">
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+
+<!-- Open button -->
+<button class="open-btn show" id="openBtn" onclick="openMsg()">📩 Open it!</button>
+
+<!-- Click burst -->
+<div class="burst" id="burst">
+  <div class="burst-circle"></div>
+  <div class="burst-circle"></div>
+  <div class="burst-circle"></div>
+  <div class="burst-circle"></div>
+  <div class="burst-circle"></div>
+</div>
+
+<script>
+  // After bike stops, stop wheels
+  setTimeout(() => {
+    document.getElementById('bikeScene').classList.add('stopped');
+  }, 3700);
+
+  function openMsg() {
+    const burst = document.getElementById('burst');
+    burst.classList.add('active');
+    document.getElementById('openBtn').style.pointerEvents = 'none';
+    document.getElementById('envWrap').style.pointerEvents = 'none';
+    setTimeout(() => {
+      // Replace with your actual message page
+      window.location.href = 'holi-dolls.html';
+    }, 700);
+  }
+</script>
+
+</body>
+</html>
